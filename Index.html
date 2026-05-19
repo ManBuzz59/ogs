@@ -1,0 +1,605 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🏆 Live Tournoi OGS Football</title>
+    <style>
+        /* Charte Graphique Officielle OGS Football */
+        :root {
+            --ogs-blue-sky: #009ee2;    /* Le bleu officiel de la bannière */
+            --ogs-blue-dark: #0f2a4a;   /* Bleu foncé pour les contrastes */
+            --ogs-yellow: #fdeb00;      /* Le jaune vif OGS */
+            --accent-ldc: #0d1b2a;      /* Bleu nuit LDC */
+            --accent-europa: #e67e22;   /* Orange Europa League */
+            --bg-body: #f4f7f6;         /* Fond de page gris/blanc moderne */
+            --bg-card: #ffffff;         /* Blanc pur pour les blocs */
+            --text-main: #1a202c;       /* Texte principal */
+            --text-muted: #718096;      /* Texte secondaire */
+        }
+        
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; }
+        body { background-color: var(--bg-body); color: var(--text-main); padding-bottom: 40px; }
+        
+        /* Header avec la bannière officielle en fond */
+        header {
+            background: linear-gradient(rgba(15, 42, 74, 0.6), rgba(15, 42, 74, 0.85)), url('banner__saebz4.jpg') center/cover no-repeat;
+            color: white;
+            padding: 30px 15px;
+            text-align: center;
+            border-bottom: 5px solid var(--ogs-yellow);
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 140px;
+        }
+
+        .header-container {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 15px;
+            max-width: 600px;
+            width: 100%;
+        }
+
+        .header-logo {
+            width: 65px;
+            height: 65px;
+            object-fit: contain;
+            background: white;
+            padding: 4px;
+            border-radius: 50%;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+            border: 2px solid var(--ogs-yellow);
+        }
+
+        .header-text { text-align: left; }
+        header h1 { font-size: 1.4rem; font-weight: 800; letter-spacing: 0.5px; text-transform: uppercase; text-shadow: 2px 2px 4px rgba(0,0,0,0.8); color: #fff; }
+        header p { font-size: 0.85rem; color: var(--ogs-yellow); font-weight: 600; text-shadow: 1px 1px 2px rgba(0,0,0,0.8); margin-top: 2px; }
+
+        /* Bouton Admin OGS */
+        .admin-toggle {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: rgba(0, 0, 0, 0.5);
+            border: 1px solid var(--ogs-yellow);
+            color: white;
+            padding: 6px 12px;
+            border-radius: 30px;
+            font-size: 0.75rem;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.2s ease;
+            backdrop-filter: blur(4px);
+        }
+        .admin-toggle.is-admin {
+            background: var(--ogs-yellow);
+            color: var(--ogs-blue-dark);
+            box-shadow: 0 0 10px rgba(253, 235, 0, 0.5);
+        }
+
+        /* Navigation Onglets */
+        .nav-tabs {
+            display: flex;
+            justify-content: space-around;
+            background: var(--bg-card);
+            margin: 15px 12px;
+            padding: 4px;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+            border: 1px solid #e2e8f0;
+        }
+        .tab-btn {
+            flex: 1;
+            padding: 12px 2px;
+            border: none;
+            background: none;
+            font-size: 0.8rem;
+            font-weight: 700;
+            color: var(--text-muted);
+            cursor: pointer;
+            border-radius: 6px;
+            transition: all 0.2s ease;
+            text-align: center;
+            text-transform: uppercase;
+        }
+        .tab-btn:hover { color: var(--ogs-blue-sky); background: #f1f5f9; }
+        .tab-btn.active {
+            background-color: var(--ogs-blue-sky);
+            color: white;
+        }
+
+        .tab-content { display: none; padding: 0 12px; }
+        .tab-content.active { display: block; }
+
+        /* Titres de Sections / Rotations */
+        .section-title {
+            font-size: 0.95rem;
+            margin: 25px 0 12px 0;
+            color: var(--ogs-blue-dark);
+            border-left: 4px solid var(--ogs-blue-sky);
+            padding-left: 10px;
+            font-weight: 700;
+            text-transform: uppercase;
+            display: flex;
+            flex-direction: column;
+        }
+        .time-info { font-size: 0.75rem; color: var(--text-muted); font-weight: 500; text-transform: none; margin-top: 2px; }
+
+        /* Cartes de Match */
+        .match-card {
+            background: var(--bg-card);
+            border-radius: 10px;
+            padding: 14px;
+            margin-bottom: 12px;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.03);
+            border: 1px solid #e2e8f0;
+            border-left: 5px solid var(--ogs-blue-sky);
+            transition: transform 0.15s ease;
+        }
+        .match-card:hover { transform: translateY(-2px); box-shadow: 0 4px 10px rgba(0,0,0,0.06); }
+        
+        .match-time {
+            font-size: 0.75rem;
+            font-weight: 700;
+            color: var(--text-muted);
+            margin-bottom: 10px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            text-transform: uppercase;
+            border-bottom: 1px dashed #e2e8f0;
+            padding-bottom: 6px;
+        }
+        
+        .terrain-badge {
+            background: #f1f5f9;
+            color: var(--ogs-blue-dark);
+            padding: 3px 8px;
+            border-radius: 4px;
+            font-size: 0.7rem;
+            font-weight: 700;
+            border: 1px solid #cbd5e1;
+        }
+
+        .match-teams { display: flex; flex-direction: column; gap: 10px; }
+        .team-row { display: flex; justify-content: space-between; align-items: center; font-size: 0.95rem; font-weight: 600; }
+        
+        .score-input {
+            width: 48px;
+            text-align: center;
+            padding: 5px;
+            border: 1px solid #cbd5e1;
+            border-radius: 6px;
+            font-weight: 700;
+            font-size: 1rem;
+            color: var(--text-main);
+            background-color: #f8fafc;
+            transition: all 0.2s ease;
+        }
+        .score-input:focus { border-color: var(--ogs-blue-sky); outline: none; background-color: #fff; box-shadow: 0 0 0 3px rgba(0, 158, 226, 0.15); }
+        .score-input:disabled { background: #f1f5f9; color: #334155; border: 1px solid #e2e8f0; }
+
+        /* Tableaux de Classement */
+        .poule-container {
+            background: var(--bg-card);
+            border-radius: 10px;
+            padding: 12px;
+            margin-bottom: 20px;
+            box-shadow: 0 3px 10px rgba(0,0,0,0.04);
+            border: 1px solid #e2e8f0;
+        }
+        .poule-title {
+            font-size: 0.95rem;
+            font-weight: 800;
+            color: var(--ogs-blue-dark);
+            background: var(--ogs-yellow);
+            margin: -12px -12px 10px -12px;
+            padding: 10px 12px;
+            border-top-left-radius: 9px;
+            border-top-right-radius: 9px;
+            letter-spacing: 0.5px;
+            border-bottom: 2px solid #e2e8f0;
+        }
+        
+        table { width: 100%; border-collapse: collapse; font-size: 0.85rem; }
+        th, td { padding: 10px 6px; text-align: center; }
+        th { background-color: #f8fafc; color: var(--text-muted); font-weight: 700; text-transform: uppercase; font-size: 0.75rem; border-bottom: 2px solid #e2e8f0; }
+        td.team-name, th.team-name { text-align: left; width: 45%; font-weight: 600; color: var(--text-main); }
+        tr:not(:last-child) { border-bottom: 1px solid #f1f5f9; }
+        tr:hover td { background-color: #f8fafc; }
+        .pts-col { font-weight: 700; color: var(--ogs-blue-sky); font-size: 0.9rem; }
+
+        .ldc-card { border-left: 5px solid var(--accent-ldc) !important; }
+        .europa-card { border-left: 5px solid var(--accent-europa) !important; }
+
+        /* Bouton de Validation Vert */
+        .btn-validation-container { margin: 30px 0 15px 0; text-align: center; display: none; }
+        .btn-validate {
+            background: linear-gradient(to bottom, #2ecc71, #27ae60);
+            color: white;
+            border: none;
+            padding: 16px 30px;
+            font-size: 0.95rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            border-radius: 8px;
+            cursor: pointer;
+            box-shadow: 0 4px 12px rgba(39, 174, 96, 0.25);
+            width: 100%;
+            transition: all 0.2s ease;
+            border-bottom: 3px solid #219653;
+        }
+        .btn-validate:hover { transform: translateY(-1px); box-shadow: 0 6px 15px rgba(39, 174, 96, 0.35); }
+        .btn-validate:active { transform: translateY(1px); border-bottom-width: 1px; }
+    </style>
+</head>
+<body>
+
+    <header>
+        <button id="adminBtn" class="admin-toggle" onclick="toggleAdminMode()">🔒 Mode: Viewer</button>
+        <div class="header-container">
+            <img src="téléchargement.jpg" alt="Logo OGS" class="header-logo">
+            <div class="header-text">
+                <h1>OLYMPIQUE GRANDE-SYNTHE</h1>
+                <p>🏆 Tournoi Officiel du 23 Mai • Live Poules & Finales</p>
+            </div>
+        </div>
+    </header>
+
+    <div class="nav-tabs">
+        <button class="tab-btn active" onclick="openTab('classement')">📊 Classements</button>
+        <button class="tab-btn" onclick="openTab('poules')">Matchs Poules</button>
+        <button class="tab-btn" onclick="openTab('ldc')">🏆 LDC</button>
+        <button class="tab-btn" onclick="openTab('europa')">🇪🇺 Europa</button>
+    </div>
+
+    <div id="classement" class="tab-content active">
+        <div class="section-title">Classement Général des Poules</div>
+        <div id="tables-container"></div>
+    </div>
+
+    <div id="poules" class="tab-content">
+        <div class="section-title">Rotation 1 — 09h00 à 10h00 <span class="time-info">Poules A & B</span></div>
+        <div class="match-card">
+            <div class="match-time"><span>Poule A</span> <span class="terrain-badge">Terrain 1</span></div>
+            <div class="match-teams"><div class="team-row"><span>OGS 1</span> <input type="number" class="score-input" data-team="OGS 1" onchange="calculerTournoi()" disabled></div><div class="team-row"><span>USP St Omer</span> <input type="number" class="score-input" data-team="USP St Omer" onchange="calculerTournoi()" disabled></div></div>
+        </div>
+        <div class="match-card">
+            <div class="match-time"><span>Poule A</span> <span class="terrain-badge">Terrain 2</span></div>
+            <div class="match-teams"><div class="team-row"><span>FC Bergues</span> <input type="number" class="score-input" data-team="FC Bergues" onchange="calculerTournoi()" disabled></div><div class="team-row"><span>KSV Veurne</span> <input type="number" class="score-input" data-team="KSV Veurne" onchange="calculerTournoi()" disabled></div></div>
+        </div>
+        <div class="match-card">
+            <div class="match-time"><span>Poule B</span> <span class="terrain-badge">Terrain 3</span></div>
+            <div class="match-teams"><div class="team-row"><span>USLD Dunkerque</span> <input type="number" class="score-input" data-team="USLD Dunkerque" onchange="calculerTournoi()" disabled></div><div class="team-row"><span>Calais/Marck</span> <input type="number" class="score-input" data-team="Calais/Marck" onchange="calculerTournoi()" disabled></div></div>
+        </div>
+        <div class="match-card">
+            <div class="match-time"><span>Poule B</span> <span class="terrain-badge">Terrain 4</span></div>
+            <div class="match-teams"><div class="team-row"><span>UFL Lambersart 2</span> <input type="number" class="score-input" data-team="UFL Lambersart 2" onchange="calculerTournoi()" disabled></div><div class="team-row"><span>FC Gravelines</span> <input type="number" class="score-input" data-team="FC Gravelines" onchange="calculerTournoi()" disabled></div></div>
+        </div>
+
+        <div class="section-title">Rotation 2 — 10h00 à 11h00 <span class="time-info">Poules C & D</span></div>
+        <div class="match-card">
+            <div class="match-time"><span>Poule C</span> <span class="terrain-badge">Terrain 1</span></div>
+            <div class="match-teams"><div class="team-row"><span>US Ascq</span> <input type="number" class="score-input" data-team="US Ascq" onchange="calculerTournoi()" disabled></div><div class="team-row"><span>FC Loon Plage</span> <input type="number" class="score-input" data-team="FC Loon Plage" onchange="calculerTournoi()" disabled></div></div>
+        </div>
+        <div class="match-card">
+            <div class="match-time"><span>Poule C</span> <span class="terrain-badge">Terrain 2</span></div>
+            <div class="match-teams"><div class="team-row"><span>AS Dunkerque Sud</span> <input type="number" class="score-input" data-team="AS Dunkerque Sud" onchange="calculerTournoi()" disabled></div><div class="team-row"><span>FC Wasquehal</span> <input type="number" class="score-input" data-team="FC Wasquehal" onchange="calculerTournoi()" disabled></div></div>
+        </div>
+        <div class="match-card">
+            <div class="match-time"><span>Poule D</span> <span class="terrain-badge">Terrain 3</span></div>
+            <div class="match-teams"><div class="team-row"><span>OGS 2</span> <input type="number" class="score-input" data-team="OGS 2" onchange="calculerTournoi()" disabled></div><div class="team-row"><span>AFC Compiègne</span> <input type="number" class="score-input" data-team="AFC Compiègne" onchange="calculerTournoi()" disabled></div></div>
+        </div>
+        <div class="match-card">
+            <div class="match-time"><span>Poule D</span> <span class="terrain-badge">Terrain 4</span></div>
+            <div class="match-teams"><div class="team-row"><span>USF Coudekerque</span> <input type="number" class="score-input" data-team="USF Coudekerque" onchange="calculerTournoi()" disabled></div><div class="team-row"><span>UFL Lambersart 1</span> <input type="number" class="score-input" data-team="UFL Lambersart 1" onchange="calculerTournoi()" disabled></div></div>
+        </div>
+
+        <div class="section-title">Rotation 3 — 11h00 à 12h00 <span class="time-info">Poules A & B</span></div>
+        <div class="match-card">
+            <div class="match-time"><span>Poule A</span> <span class="terrain-badge">Terrain 1</span></div>
+            <div class="match-teams"><div class="team-row"><span>OGS 1</span> <input type="number" class="score-input" data-team="OGS 1" onchange="calculerTournoi()" disabled></div><div class="team-row"><span>FC Bergues</span> <input type="number" class="score-input" data-team="FC Bergues" onchange="calculerTournoi()" disabled></div></div>
+        </div>
+        <div class="match-card">
+            <div class="match-time"><span>Poule A</span> <span class="terrain-badge">Terrain 2</span></div>
+            <div class="match-teams"><div class="team-row"><span>USP St Omer</span> <input type="number" class="score-input" data-team="USP St Omer" onchange="calculerTournoi()" disabled></div><div class="team-row"><span>KSV Veurne</span> <input type="number" class="score-input" data-team="KSV Veurne" onchange="calculerTournoi()" disabled></div></div>
+        </div>
+        <div class="match-card">
+            <div class="match-time"><span>Poule B</span> <span class="terrain-badge">Terrain 3</span></div>
+            <div class="match-teams"><div class="team-row"><span>USLD Dunkerque</span> <input type="number" class="score-input" data-team="USLD Dunkerque" onchange="calculerTournoi()" disabled></div><div class="team-row"><span>UFL Lambersart 2</span> <input type="number" class="score-input" data-team="UFL Lambersart 2" onchange="calculerTournoi()" disabled></div></div>
+        </div>
+        <div class="match-card">
+            <div class="match-time"><span>Poule B</span> <span class="terrain-badge">Terrain 4</span></div>
+            <div class="match-teams"><div class="team-row"><span>Calais/Marck</span> <input type="number" class="score-input" data-team="Calais/Marck" onchange="calculerTournoi()" disabled></div><div class="team-row"><span>FC Gravelines</span> <input type="number" class="score-input" data-team="FC Gravelines" onchange="calculerTournoi()" disabled></div></div>
+        </div>
+
+        <div class="section-title">Rotation 4 — 12h00 à 13h00 <span class="time-info">Poules C & D</span></div>
+        <div class="match-card">
+            <div class="match-time"><span>Poule C</span> <span class="terrain-badge">Terrain 1</span></div>
+            <div class="match-teams"><div class="team-row"><span>US Ascq</span> <input type="number" class="score-input" data-team="US Ascq" onchange="calculerTournoi()" disabled></div><div class="team-row"><span>AS Dunkerque Sud</span> <input type="number" class="score-input" data-team="AS Dunkerque Sud" onchange="calculerTournoi()" disabled></div></div>
+        </div>
+        <div class="match-card">
+            <div class="match-time"><span>Poule C</span> <span class="terrain-badge">Terrain 2</span></div>
+            <div class="match-teams"><div class="team-row"><span>FC Loon Plage</span> <input type="number" class="score-input" data-team="FC Loon Plage" onchange="calculerTournoi()" disabled></div><div class="team-row"><span>FC Wasquehal</span> <input type="number" class="score-input" data-team="FC Wasquehal" onchange="calculerTournoi()" disabled></div></div>
+        </div>
+        <div class="match-card">
+            <div class="match-time"><span>Poule D</span> <span class="terrain-badge">Terrain 3</span></div>
+            <div class="match-teams"><div class="team-row"><span>OGS 2</span> <input type="number" class="score-input" data-team="OGS 2" onchange="calculerTournoi()" disabled></div><div class="team-row"><span>USF Coudekerque</span> <input type="number" class="score-input" data-team="USF Coudekerque" onchange="calculerTournoi()" disabled></div></div>
+        </div>
+        <div class="match-card">
+            <div class="match-time"><span>Poule D</span> <span class="terrain-badge">Terrain 4</span></div>
+            <div class="match-teams"><div class="team-row"><span>AFC Compiègne</span> <input type="number" class="score-input" data-team="AFC Compiègne" onchange="calculerTournoi()" disabled></div><div class="team-row"><span>UFL Lambersart 1</span> <input type="number" class="score-input" data-team="UFL Lambersart 1" onchange="calculerTournoi()" disabled></div></div>
+        </div>
+
+        <div class="section-title">Rotation 5 — 13h00 à 14h00 <span class="time-info">Poules A & B</span></div>
+        <div class="match-card">
+            <div class="match-time"><span>Poule A</span> <span class="terrain-badge">Terrain 1</span></div>
+            <div class="match-teams"><div class="team-row"><span>OGS 1</span> <input type="number" class="score-input" data-team="OGS 1" onchange="calculerTournoi()" disabled></div><div class="team-row"><span>KSV Veurne</span> <input type="number" class="score-input" data-team="KSV Veurne" onchange="calculerTournoi()" disabled></div></div>
+        </div>
+        <div class="match-card">
+            <div class="match-time"><span>Poule A</span> <span class="terrain-badge">Terrain 2</span></div>
+            <div class="match-teams"><div class="team-row"><span>USP St Omer</span> <input type="number" class="score-input" data-team="USP St Omer" onchange="calculerTournoi()" disabled></div><div class="team-row"><span>FC Bergues</span> <input type="number" class="score-input" data-team="FC Bergues" onchange="calculerTournoi()" disabled></div></div>
+        </div>
+        <div class="match-card">
+            <div class="match-time"><span>Poule B</span> <span class="terrain-badge">Terrain 3</span></div>
+            <div class="match-teams"><div class="team-row"><span>USLD Dunkerque</span> <input type="number" class="score-input" data-team="USLD Dunkerque" onchange="calculerTournoi()" disabled></div><div class="team-row"><span>FC Gravelines</span> <input type="number" class="score-input" data-team="FC Gravelines" onchange="calculerTournoi()" disabled></div></div>
+        </div>
+        <div class="match-card">
+            <div class="match-time"><span>Poule B</span> <span class="terrain-badge">Terrain 4</span></div>
+            <div class="match-teams"><div class="team-row"><span>Calais/Marck</span> <input type="number" class="score-input" data-team="Calais/Marck" onchange="calculerTournoi()" disabled></div><div class="team-row"><span>UFL Lambersart 2</span> <input type="number" class="score-input" data-team="UFL Lambersart 2" onchange="calculerTournoi()" disabled></div></div>
+        </div>
+
+        <div class="section-title">Rotation 6 — 14h00 à 15h00 <span class="time-info">Poules C & D</span></div>
+        <div class="match-card">
+            <div class="match-time"><span>Poule C</span> <span class="terrain-badge">Terrain 1</span></div>
+            <div class="match-teams"><div class="team-row"><span>US Ascq</span> <input type="number" class="score-input" data-team="US Ascq" onchange="calculerTournoi()" disabled></div><div class="team-row"><span>FC Wasquehal</span> <input type="number" class="score-input" data-team="FC Wasquehal" onchange="calculerTournoi()" disabled></div></div>
+        </div>
+        <div class="match-card">
+            <div class="match-time"><span>Poule C</span> <span class="terrain-badge">Terrain 2</span></div>
+            <div class="match-teams"><div class="team-row"><span>FC Loon Plage</span> <input type="number" class="score-input" data-team="FC Loon Plage" onchange="calculerTournoi()" disabled></div><div class="team-row"><span>AS Dunkerque Sud</span> <input type="number" class="score-input" data-team="AS Dunkerque Sud" onchange="calculerTournoi()" disabled></div></div>
+        </div>
+        <div class="match-card">
+            <div class="match-time"><span>Poule D</span> <span class="terrain-badge">Terrain 3</span></div>
+            <div class="match-teams"><div class="team-row"><span>OGS 2</span> <input type="number" class="score-input" data-team="OGS 2" onchange="calculerTournoi()" disabled></div><div class="team-row"><span>UFL Lambersart 1</span> <input type="number" class="score-input" data-team="UFL Lambersart 1" onchange="calculerTournoi()" disabled></div></div>
+        </div>
+        <div class="match-card">
+            <div class="match-time"><span>Poule D</span> <span class="terrain-badge">Terrain 4</span></div>
+            <div class="match-teams"><div class="team-row"><span>AFC Compiègne</span> <input type="number" class="score-input" data-team="AFC Compiègne" onchange="calculerTournoi()" disabled></div><div class="team-row"><span>USF Coudekerque</span> <input type="number" class="score-input" data-team="USF Coudekerque" onchange="calculerTournoi()" disabled></div></div>
+        </div>
+
+        <div id="validationContainer" class="btn-validation-container">
+            <button class="btn-validate" onclick="validerPoulesEtGenererPhasesFinales()">Valider la fin des poules</button>
+        </div>
+    </div>
+
+    <div id="ldc" class="tab-content">
+        <div class="section-title">Quarts de Finale — 15h30 à 16h30</div>
+        <div class="match-card ldc-card">
+            <div class="match-time"><span>Quart 1</span> <span class="terrain-badge">Terrain 1</span></div>
+            <div class="match-teams"><div class="team-row"><span id="ldc-q1-t1">1er Poule A</span> <input type="number" class="score-input" disabled></div><div class="team-row"><span id="ldc-q1-t2">2ème Poule B</span> <input type="number" class="score-input" disabled></div></div>
+        </div>
+        <div class="match-card ldc-card">
+            <div class="match-time"><span>Quart 2</span> <span class="terrain-badge">Terrain 2</span></div>
+            <div class="match-teams"><div class="team-row"><span id="ldc-q2-t1">1er Poule B</span> <input type="number" class="score-input" disabled></div><div class="team-row"><span id="ldc-q2-t2">2ème Poule A</span> <input type="number" class="score-input" disabled></div></div>
+        </div>
+        <div class="match-card ldc-card">
+            <div class="match-time"><span>Quart 3</span> <span class="terrain-badge">Terrain 1 (16h30)</span></div>
+            <div class="match-teams"><div class="team-row"><span id="ldc-q3-t1">1er Poule C</span> <input type="number" class="score-input" disabled></div><div class="team-row"><span id="ldc-q3-t2">2ème Poule D</span> <input type="number" class="score-input" disabled></div></div>
+        </div>
+        <div class="match-card ldc-card">
+            <div class="match-time"><span>Quart 4</span> <span class="terrain-badge">Terrain 2 (16h30)</span></div>
+            <div class="match-teams"><div class="team-row"><span id="ldc-q4-t1">1er Poule D</span> <input type="number" class="score-input" disabled></div><div class="team-row"><span id="ldc-q4-t2">2ème Poule C</span> <input type="number" class="score-input" disabled></div></div>
+        </div>
+
+        <div class="section-title">Demi-Finales — 17h30 à 18h30</div>
+        <div class="match-card ldc-card">
+            <div class="match-time"><span>Demi 1</span> <span class="terrain-badge">Terrain 1</span></div>
+            <div class="match-teams"><div class="team-row"><span>Vainqueur Quart 1</span> <input type="number" class="score-input" disabled></div><div class="team-row"><span>Vainqueur Quart 3</span> <input type="number" class="score-input" disabled></div></div>
+        </div>
+        <div class="match-card ldc-card">
+            <div class="match-time"><span>Demi 2</span> <span class="terrain-badge">Terrain 2</span></div>
+            <div class="match-teams"><div class="team-row"><span>Vainqueur Quart 2</span> <input type="number" class="score-input" disabled></div><div class="team-row"><span>Vainqueur Quart 4</span> <input type="number" class="score-input" disabled></div></div>
+        </div>
+
+        <div class="section-title">🏆 Grande Finale LDC — 18h45</div>
+        <div class="match-card" style="border-left: 5px solid var(--ogs-yellow) !important; background: linear-gradient(to right, #ffffff, #fffdf0); transform: scale(1.01); box-shadow: 0 4px 12px rgba(0,0,0,0.08);">
+            <div class="match-time"><span>FINALE</span> <span class="terrain-badge" style="background:var(--ogs-yellow); color:var(--ogs-blue-dark); border-color: var(--ogs-yellow);">Terrain 1</span></div>
+            <div class="match-teams"><div class="team-row"><span style="font-weight:700; color: var(--ogs-blue-dark);">Finaliste 1</span> <input type="number" class="score-input" disabled></div><div class="team-row"><span style="font-weight:700; color: var(--ogs-blue-dark);">Finaliste 2</span> <input type="number" class="score-input" disabled></div></div>
+        </div>
+    </div>
+
+    <div id="europa" class="tab-content">
+        <div class="section-title">Quarts de Finale — 15h30 à 16h30</div>
+        <div class="match-card europa-card">
+            <div class="match-time"><span>Quart 1</span> <span class="terrain-badge">Terrain 3</span></div>
+            <div class="match-teams"><div class="team-row"><span id="europa-q1-t1">3ème Poule A</span> <input type="number" class="score-input" disabled></div><div class="team-row"><span id="europa-q1-t2">4ème Poule B</span> <input type="number" class="score-input" disabled></div></div>
+        </div>
+        <div class="match-card europa-card">
+            <div class="match-time"><span>Quart 2</span> <span class="terrain-badge">Terrain 4</span></div>
+            <div class="match-teams"><div class="team-row"><span id="europa-q2-t1">3ème Poule B</span> <input type="number" class="score-input" disabled></div><div class="team-row"><span id="europa-q2-t2">4ème Poule A</span> <input type="number" class="score-input" disabled></div></div>
+        </div>
+        <div class="match-card europa-card">
+            <div class="match-time"><span>Quart 3</span> <span class="terrain-badge">Terrain 3 (16h30)</span></div>
+            <div class="match-teams"><div class="team-row"><span id="europa-q3-t1">3ème Poule C</span> <input type="number" class="score-input" disabled></div><div class="team-row"><span id="europa-q3-t2">4ème Poule D</span> <input type="number" class="score-input" disabled></div></div>
+        </div>
+        <div class="match-card europa-card">
+            <div class="match-time"><span>Quart 4</span> <span class="terrain-badge">Terrain 4 (16h30)</span></div>
+            <div class="match-teams"><div class="team-row"><span id="europa-q4-t1">3ème Poule D</span> <input type="number" class="score-input" disabled></div><div class="team-row"><span id="europa-q4-t2">4ème Poule C</span> <input type="number" class="score-input" disabled></div></div>
+        </div>
+
+        <div class="section-title">Demi-Finales — 17h30 à 18h30</div>
+        <div class="match-card europa-card">
+            <div class="match-time"><span>Demi 1</span> <span class="terrain-badge">Terrain 3</span></div>
+            <div class="match-teams"><div class="team-row"><span>Vainqueur Quart 1</span> <input type="number" class="score-input" disabled></div><div class="team-row"><span>Vainqueur Quart 3</span> <input type="number" class="score-input" disabled></div></div>
+        </div>
+        <div class="match-card europa-card">
+            <div class="match-time"><span>Demi 2</span> <span class="terrain-badge">Terrain 4</span></div>
+            <div class="match-teams"><div class="team-row"><span>Vainqueur Quart 2</span> <input type="number" class="score-input" disabled></div><div class="team-row"><span>Vainqueur Quart 4</span> <input type="number" class="score-input" disabled></div></div>
+        </div>
+
+        <div class="section-title">🇪🇺 Finale Europa League — 18h45</div>
+        <div class="match-card europa-card" style="background: linear-gradient(to right, #ffffff, #fff6f0);">
+            <div class="match-time"><span>FINALE</span> <span class="terrain-badge">Terrain 2</span></div>
+            <div class="match-teams"><div class="team-row"><span style="font-weight:700; color: var(--accent-europa);">Finaliste 1</span> <input type="number" class="score-input" disabled></div><div class="team-row"><span style="font-weight:700; color: var(--accent-europa);">Finaliste 2</span> <input type="number" class="score-input" disabled></div></div>
+        </div>
+    </div>
+
+    <script>
+        let isAdmin = false;
+        const ADMIN_CODE = "5976";
+        let d_classements_finaux = {};
+
+        // Configuration officielle des poules transmise
+        const d_equipes = {
+            'A': ['OGS 1', 'USP St Omer', 'FC Bergues', 'KSV Veurne'],
+            'B': ['USLD Dunkerque', 'Calais/Marck', 'UFL Lambersart 2', 'FC Gravelines'],
+            'C': ['US Ascq', 'FC Loon Plage', 'AS Dunkerque Sud', 'FC Wasquehal'],
+            'D': ['OGS 2', 'AFC Compiègne', 'USF Coudekerque', 'UFL Lambersart 1']
+        };
+
+        function toggleAdminMode() {
+            if (!isAdmin) {
+                let code = prompt("Entrez le code d'accès Admin :");
+                if (code === ADMIN_CODE) {
+                    isAdmin = true;
+                    document.getElementById('adminBtn').innerText = "🔓 Mode: Admin";
+                    document.getElementById('adminBtn').classList.add('is-admin');
+                    document.getElementById('validationContainer').style.display = 'block';
+                    toggleInputs(false);
+                } else {
+                    alert("Code incorrect !");
+                }
+            } else {
+                isAdmin = false;
+                document.getElementById('adminBtn').innerText = "🔒 Mode: Viewer";
+                document.getElementById('adminBtn').classList.remove('is-admin');
+                document.getElementById('validationContainer').style.display = 'none';
+                toggleInputs(true);
+            }
+        }
+
+        function toggleInputs(disabledValue) {
+            let inputs = document.querySelectorAll('.score-input');
+            inputs.forEach(input => input.disabled = disabledValue);
+        }
+
+        function openTab(tabName) {
+            var x = document.getElementsByClassName("tab-content");
+            var tabs = document.getElementsByClassName("tab-btn");
+            for (var i = 0; i < x.length; i++) {
+                x[i].style.display = "none";  
+                tabs[i].classList.remove("active");
+            }
+            document.getElementById(tabName).style.display = "block";  
+            event.currentTarget.classList.add("active");
+        }
+
+        function calculerTournoi() {
+            let stats = {};
+            for (let poule in d_equipes) {
+                d_equipes[poule].forEach(team => {
+                    stats[team] = { poule: poule, pts: 0, bm: 0, be: 0, diff: 0 };
+                });
+            }
+
+            let matchCards = document.querySelectorAll('#poules .match-card');
+            matchCards.forEach(card => {
+                let inputs = card.querySelectorAll('.score-input');
+                let t1 = inputs[0].getAttribute('data-team');
+                let t2 = inputs[1].getAttribute('data-team');
+                
+                if (inputs[0].value !== "" && inputs[1].value !== "") {
+                    let s1 = parseInt(inputs[0].value) || 0;
+                    let s2 = parseInt(inputs[1].value) || 0;
+
+                    stats[t1].bm += s1; stats[t1].be += s2;
+                    stats[t2].bm += s2; stats[t2].be += s1;
+
+                    if (s1 > s2) { stats[t1].pts += 3; }
+                    else if (s1 < s2) { stats[t2].pts += 3; }
+                    else { stats[t1].pts += 1; stats[t2].pts += 1; }
+                }
+            });
+
+            for (let team in stats) { stats[team].diff = stats[team].bm - stats[team].be; }
+
+            let html = "";
+            for (let poule in d_equipes) {
+                let equipesTriees = d_equipes[poule].map(t => ({name: t, ...stats[t]}));
+                equipesTriees.sort((a, b) => b.pts - a.pts || b.diff - a.diff || b.bm - a.bm);
+
+                d_classements_finaux[poule] = equipesTriees;
+
+                html += `
+                <div class="poule-container">
+                    <div class="poule-title">POULE ${poule}</div>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th class="team-name">Équipe</th>
+                                <th class="pts-col">Pts</th>
+                                <th>BP</th>
+                                <th>BC</th>
+                                <th>Diff.</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                `;
+
+                equipesTriees.forEach((eq, index) => {
+                    let diffAffichage = eq.diff > 0 ? `+${eq.diff}` : eq.diff;
+                    html += `
+                            <tr>
+                                <td class="team-name">${index + 1}. ${eq.name}</td>
+                                <td class="pts-col">${eq.pts}</td>
+                                <td>${eq.bm}</td>
+                                <td>${eq.be}</td>
+                                <td style="font-weight: 700; color: ${eq.diff > 0 ? '#27ae60' : (eq.diff < 0 ? '#e74c3c' : 'inherit')}">${diffAffichage}</td>
+                            </tr>
+                    `;
+                });
+                html += `</tbody></table></div>`;
+            }
+            document.getElementById('tables-container').innerHTML = html;
+        }
+
+        function validerPoulesEtGenererPhasesFinales() {
+            if (confirm("Confirmer la validation des poules et générer les phases finales pour l'OGS ?")) {
+                calculerTournoi();
+
+                // LDC (1ers et 2èmes)
+                document.getElementById('ldc-q1-t1').innerText = "1. " + d_classements_finaux['A'][0].name;
+                document.getElementById('ldc-q1-t2').innerText = "2. " + d_classements_finaux['B'][1].name;
+                document.getElementById('ldc-q2-t1').innerText = "1. " + d_classements_finaux['B'][0].name;
+                document.getElementById('ldc-q2-t2').innerText = "2. " + d_classements_finaux['A'][1].name;
+                document.getElementById('ldc-q3-t1').innerText = "1. " + d_classements_finaux['C'][0].name;
+                document.getElementById('ldc-q3-t2').innerText = "2. " + d_classements_finaux['D'][1].name;
+                document.getElementById('ldc-q4-t1').innerText = "1. " + d_classements_finaux['D'][0].name;
+                document.getElementById('ldc-q4-t2').innerText = "2. " + d_classements_finaux['C'][1].name;
+
+                // Europa (3èmes et 4èmes)
+                document.getElementById('europa-q1-t1').innerText = "3. " + d_classements_finaux['A'][2].name;
+                document.getElementById('europa-q1-t2').innerText = "4. " + d_classements_finaux['B'][3].name;
+                document.getElementById('europa-q2-t1').innerText = "3. " + d_classements_finaux['B'][2].name;
+                document.getElementById('europa-q2-t2').innerText = "4. " + d_classements_finaux['A'][3].name;
+                document.getElementById('europa-q3-t1').innerText = "3. " + d_classements_finaux['C'][2].name;
+                document.getElementById('europa-q3-t2').innerText = "4. " + d_classements_finaux['D'][3].name;
+                document.getElementById('europa-q4-t1').innerText = "3. " + d_classements_finaux['D'][2].name;
+                document.getElementById('europa-q4-t2').innerText = "4. " + d_classements_finaux['C'][3].name;
+
+                alert("Tableaux LDC et Europa mis à jour avec succès !");
+                openTab('ldc');
+            }
+        }
+
+        window.onload = function() { calculerTournoi(); };
+    </script>
+</body>
+</html>
