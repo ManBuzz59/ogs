@@ -1,0 +1,9 @@
+<Files "tournoi_data.txt">
+    Deny from all
+</Files>
+
+# Uncomment the line below if you need to make the file writable via PHP
+# (Note: This requires your hosting provider to support chmod via Apache)
+# <Files "tournoi_data.txt">
+#     SetEnvIf Request_URI ".*" CHMOD=0666
+# </Files>
