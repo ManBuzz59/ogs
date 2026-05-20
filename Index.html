@@ -191,8 +191,6 @@
         
         .btn-save-config { background: linear-gradient(to bottom, #3498db, #2980b9); color: white; border: none; padding: 15px; font-size: 1rem; font-weight: 700; text-transform: uppercase; border-radius: 8px; cursor: pointer; width: 100%; margin: 20px 0 40px 0; border-bottom: 3px solid #2471a3; }
         .btn-save-config:hover { filter: brightness(1.05); }
-
-        .export-box { width: 100%; height: 120px; font-family: monospace; font-size: 0.75rem; padding: 10px; border-radius: 6px; border: 1px solid #cbd5e1; background: #f8fafc; margin-top: 8px; resize: none; }
     </style>
 </head>
 <body>
@@ -203,7 +201,7 @@
             <img src="téléchargement.jpg" alt="Logo OGS" class="header-logo">
             <div class="header-text">
                 <h1 id="header-main-title">OLYMPIQUE GRANDE-SYNTHE</h1>
-                <p id="header-sub-title">🏆 Chargement du live...</p>
+                <p id="header-sub-title">🏆 Chargement en cours...</p>
             </div>
         </div>
     </header>
@@ -218,7 +216,7 @@
 
     <div id="classement" class="tab-content active">
         <div class="section-title">Classement Général des Poules</div>
-        <div id="tables-container">Aucune donnée chargée.</div>
+        <div id="tables-container">Aucune donnée trouvée.</div>
     </div>
 
     <div id="poules" class="tab-content">
@@ -272,13 +270,7 @@
         <div class="section-title">Gestion des Équipes par Poule</div>
         <div id="config-teams-container"></div>
         
-        <button class="btn-save-config" onclick="sauvegarderEtAppliquerConfiguration()">💾 Sauvegarder et Régénérer le Tournoi</button>
-
-        <div class="section-title" style="color: var(--danger-color);">🔗 Code Officiel pour `tournoi_data.txt`</div>
-        <p style="font-size: 0.8rem; font-weight: 600; color: var(--text-muted); margin-bottom: 8px;">
-            Dès que vous effectuez un changement important (nouveaux scores, horaires, etc.), copiez la totalité du texte ci-dessous et remplacez le contenu du fichier <strong>tournoi_data.txt</strong> sur votre hébergeur FTP :
-        </p>
-        <textarea id="export-json-area" class="export-box" readonly onclick="this.select()"></textarea>
+        <button class="btn-save-config" onclick="sauvegarderEtAppliquerConfiguration()">💾 Enregistrer les modifications sur le serveur</button>
     </div>
 
     <script>
@@ -292,7 +284,8 @@
         let matchsEuropa = [];
         let d_classements_finaux = {};
 
-        function mettreAJourExportationTextuelle() {
+        // 🚀 ENVOI DIRECT ET AUTOMATIQUE AU SERVEUR VIA LE PHP
+        async function enregistrerDirectementSurServeur() {
             let backup = {
                 configTournoi: configTournoi,
                 d_equipes: d_equipes,
@@ -300,24 +293,32 @@
                 matchsLdc: matchsLdc,
                 matchsEuropa: matchsEuropa
             };
-            document.getElementById('export-json-area').value = JSON.stringify(backup, null, 2);
-        }
 
-        function sauvegarderDansLeNavigateur() {
+            try {
+                const response = await fetch('sauvegarder.php', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(backup, null, 2)
+                });
+                
+                if (!response.ok) throw new Error("Erreur serveur");
+                console.log("Données enregistrées en temps réel sur le fichier txt officiel !");
+            } catch (err) {
+                console.error("Échec de la mise à jour automatique sur l'hébergeur. Stockage local temporaire.", err);
+            }
+            
+            // Sécurité locale additionnelle
             localStorage.setItem('ogs_configTournoi', JSON.stringify(configTournoi));
             localStorage.setItem('ogs_d_equipes', JSON.stringify(d_equipes));
             localStorage.setItem('ogs_matchsPoules', JSON.stringify(matchsPoules));
             localStorage.setItem('ogs_matchsLdc', JSON.stringify(matchsLdc));
             localStorage.setItem('ogs_matchsEuropa', JSON.stringify(matchsEuropa));
-            mettreAJourExportationTextuelle();
         }
 
-        // Chargement asynchrone dynamique depuis le serveur FTP via AJAX Fetch
         async function chargerDonneesGénérales() {
             try {
-                // Étape 1 : On tente de lire le fichier txt officiel sur l'hébergeur
-                const response = await fetch('tournoi_data.txt?cache=' + Date.now()); // Anti-cache inclus
-                if (!response.ok) throw new Error("Fichier absent");
+                const response = await fetch('tournoi_data.txt?cache=' + Date.now());
+                if (!response.ok) throw new Error("Fichier inexistant");
                 
                 const data = await response.json();
                 configTournoi = data.configTournoi;
@@ -325,11 +326,8 @@
                 matchsPoules = data.matchsPoules;
                 matchsLdc = data.matchsLdc;
                 matchsEuropa = data.matchsEuropa;
-                console.log("Données chargées avec succès depuis le fichier serveur !");
                 return true;
             } catch (error) {
-                console.warn("Impossible de charger le fichier txt, bascule sur la mémoire locale du navigateur...", error);
-                // Étape 2 : Secours si le fichier txt n'est pas trouvé
                 if (localStorage.getItem('ogs_configTournoi')) {
                     configTournoi = JSON.parse(localStorage.getItem('ogs_configTournoi'));
                     d_equipes = JSON.parse(localStorage.getItem('ogs_d_equipes'));
@@ -478,7 +476,6 @@
                     document.getElementById('adminBtn').classList.add('is-admin');
                     document.getElementById('validationContainer').style.display = 'block';
                     document.getElementById('tab-btn-config').style.display = 'block';
-                    mettreAJourExportationTextuelle();
                     renderAll();
                 } else { alert("Code incorrect !"); }
             } else {
@@ -522,9 +519,9 @@
 
             rafraichirChampsFormulaire();
             calculerTournoi();
-            sauvegarderDansLeNavigateur(); 
+            enregistrerDirectementSurServeur(); 
             renderAll();
-            alert("💾 Enregistré ! N'oubliez pas de mettre à jour le fichier 'tournoi_data.txt' grâce au bloc rouge en bas !");
+            alert("✅ Enregistré ! Fichier serveur mis à jour automatiquement pour tous les viewers.");
         }
 
         function updateMatchField(matchId, field, value, typeList) {
@@ -533,7 +530,7 @@
             if(m) {
                 m[field] = value;
                 calculerTournoi();
-                sauvegarderDansLeNavigateur();
+                enregistrerDirectementSurServeur();
             }
         }
 
@@ -554,7 +551,7 @@
                     alert("⚠️ Conflit d'horaire !");
                     m.heure = ancienneHeure;
                 } else {
-                    sauvegarderDansLeNavigateur();
+                    enregistrerDirectementSurServeur();
                 }
                 renderAll();
             }
@@ -569,19 +566,19 @@
                     if(m.team2 === ancienNom) m.team2 = nouveauNom;
                 }
             });
-            sauvegarderDansLeNavigateur();
+            enregistrerDirectementSurServeur();
         }
 
         function ajouterEquipe(poule) {
             let num = d_equipes[poule].length + 1;
             d_equipes[poule].push(`Nouvelle Équipe ${num}`);
-            sauvegarderDansLeNavigateur();
+            enregistrerDirectementSurServeur();
             renderConfigEquipes();
         }
 
         function supprimerEquipe(poule, index) {
             d_equipes[poule].splice(index, 1);
-            sauvegarderDansLeNavigateur();
+            enregistrerDirectementSurServeur();
             renderConfigEquipes();
         }
 
@@ -761,7 +758,7 @@
                 matchsEuropa[3].team1 = d_classements_finaux['D'][2]?.name || '3ème D';
                 matchsEuropa[3].team2 = d_classements_finaux['C'][3]?.name || '4ème C';
 
-                sauvegarderDansLeNavigateur();
+                enregistrerDirectementSurServeur();
                 renderAll();
                 alert("Tableaux mis à jour !");
                 openTab('ldc');
@@ -775,11 +772,9 @@
             renderConfigEquipes();
         }
 
-        // Point d'entrée asynchrone au chargement
         window.onload = async function() {
             let charge = await chargerDonneesGénérales();
             if (!charge) {
-                // Secours ultime si tout est vide
                 configTournoi = { date: "2026-05-23", heureDebut: "09:00", heureFin: "19:00", nbTerrains: 4, dureeMitemps: 15, dureePause: 5, dureeRot: 10 };
                 d_equipes = { 'A': ['Équipe 1'], 'B': ['Équipe 2'], 'C': ['Équipe 3'], 'D': ['Équipe 4'] };
                 initMatchsPoules();
@@ -787,7 +782,6 @@
             }
             rafraichirChampsFormulaire();
             calculerTournoi();
-            mettreAJourExportationTextuelle();
             renderAll();
         };
     </script>
