@@ -1,0 +1,477 @@
+{
+  "configTournoi": {
+    "date": "2026-05-23",
+    "heureDebut": "09:00",
+    "heureFin": "19:00",
+    "nbTerrains": 4,
+    "dureeMitemps": 15,
+    "dureePause": 5,
+    "dureeRot": 10
+  },
+  "d_equipes": {
+    "A": [
+      "OGS 1",
+      "USP St Omer",
+      "FC Bergues",
+      "KSV Veurne"
+    ],
+    "B": [
+      "USLD Dunkerque",
+      "Calais/Marck",
+      "UFL Lambersart 2",
+      "FC Gravelines"
+    ],
+    "C": [
+      "US Ascq",
+      "FC Loon Plage",
+      "AS Dunkerque Sud",
+      "FC Wasquehal"
+    ],
+    "D": [
+      "OGS 2",
+      "AFC Compiègne",
+      "USF Coudekerque",
+      "UFL Lambersart 1"
+    ]
+  },
+  "matchsPoules": [
+    {
+      "id": "P-1-A-0",
+      "rotation": 1,
+      "heure": "09:00",
+      "poule": "A",
+      "terrain": 1,
+      "team1": "OGS 1",
+      "team2": "USP St Omer",
+      "score1": "",
+      "score2": ""
+    },
+    {
+      "id": "P-1-A-1",
+      "rotation": 1,
+      "heure": "09:00",
+      "poule": "A",
+      "terrain": 2,
+      "team1": "FC Bergues",
+      "team2": "KSV Veurne",
+      "score1": "",
+      "score2": ""
+    },
+    {
+      "id": "P-1-B-0",
+      "rotation": 1,
+      "heure": "09:00",
+      "poule": "B",
+      "terrain": 3,
+      "team1": "USLD Dunkerque",
+      "team2": "Calais/Marck",
+      "score1": "",
+      "score2": ""
+    },
+    {
+      "id": "P-1-B-1",
+      "rotation": 1,
+      "heure": "09:00",
+      "poule": "B",
+      "terrain": 4,
+      "team1": "UFL Lambersart 2",
+      "team2": "FC Gravelines",
+      "score1": "",
+      "score2": ""
+    },
+    {
+      "id": "P-2-C-0",
+      "rotation": 2,
+      "heure": "09:45",
+      "poule": "C",
+      "terrain": 1,
+      "team1": "US Ascq",
+      "team2": "FC Loon Plage",
+      "score1": "",
+      "score2": ""
+    },
+    {
+      "id": "P-2-C-1",
+      "rotation": 2,
+      "heure": "09:45",
+      "poule": "C",
+      "terrain": 2,
+      "team1": "AS Dunkerque Sud",
+      "team2": "FC Wasquehal",
+      "score1": "",
+      "score2": ""
+    },
+    {
+      "id": "P-2-D-0",
+      "rotation": 2,
+      "heure": "09:45",
+      "poule": "D",
+      "terrain": 3,
+      "team1": "OGS 2",
+      "team2": "AFC Compiègne",
+      "score1": "",
+      "score2": ""
+    },
+    {
+      "id": "P-2-D-1",
+      "rotation": 2,
+      "heure": "09:45",
+      "poule": "D",
+      "terrain": 4,
+      "team1": "USF Coudekerque",
+      "team2": "UFL Lambersart 1",
+      "score1": "",
+      "score2": ""
+    },
+    {
+      "id": "P-3-A-0",
+      "rotation": 3,
+      "heure": "10:30",
+      "poule": "A",
+      "terrain": 1,
+      "team1": "OGS 1",
+      "team2": "FC Bergues",
+      "score1": "",
+      "score2": ""
+    },
+    {
+      "id": "P-3-A-1",
+      "rotation": 3,
+      "heure": "10:30",
+      "poule": "A",
+      "terrain": 2,
+      "team1": "USP St Omer",
+      "team2": "KSV Veurne",
+      "score1": "",
+      "score2": ""
+    },
+    {
+      "id": "P-3-B-0",
+      "rotation": 3,
+      "heure": "10:30",
+      "poule": "B",
+      "terrain": 3,
+      "team1": "USLD Dunkerque",
+      "team2": "UFL Lambersart 2",
+      "score1": "",
+      "score2": ""
+    },
+    {
+      "id": "P-3-B-1",
+      "rotation": 3,
+      "heure": "10:30",
+      "poule": "B",
+      "terrain": 4,
+      "team1": "Calais/Marck",
+      "team2": "FC Gravelines",
+      "score1": "",
+      "score2": ""
+    },
+    {
+      "id": "P-4-C-0",
+      "rotation": 4,
+      "heure": "11:15",
+      "poule": "C",
+      "terrain": 1,
+      "team1": "US Ascq",
+      "team2": "AS Dunkerque Sud",
+      "score1": "",
+      "score2": ""
+    },
+    {
+      "id": "P-4-C-1",
+      "rotation": 4,
+      "heure": "11:15",
+      "poule": "C",
+      "terrain": 2,
+      "team1": "FC Loon Plage",
+      "team2": "FC Wasquehal",
+      "score1": "",
+      "score2": ""
+    },
+    {
+      "id": "P-4-D-0",
+      "rotation": 4,
+      "heure": "11:15",
+      "poule": "D",
+      "terrain": 3,
+      "team1": "OGS 2",
+      "team2": "USF Coudekerque",
+      "score1": "",
+      "score2": ""
+    },
+    {
+      "id": "P-4-D-1",
+      "rotation": 4,
+      "heure": "11:15",
+      "poule": "D",
+      "terrain": 4,
+      "team1": "AFC Compiègne",
+      "team2": "UFL Lambersart 1",
+      "score1": "",
+      "score2": ""
+    },
+    {
+      "id": "P-5-A-0",
+      "rotation": 5,
+      "heure": "12:00",
+      "poule": "A",
+      "terrain": 1,
+      "team1": "OGS 1",
+      "team2": "KSV Veurne",
+      "score1": "",
+      "score2": ""
+    },
+    {
+      "id": "P-5-A-1",
+      "rotation": 5,
+      "heure": "12:00",
+      "poule": "A",
+      "terrain": 2,
+      "team1": "USP St Omer",
+      "team2": "FC Bergues",
+      "score1": "",
+      "score2": ""
+    },
+    {
+      "id": "P-5-B-0",
+      "rotation": 5,
+      "heure": "12:00",
+      "poule": "B",
+      "terrain": 3,
+      "team1": "USLD Dunkerque",
+      "team2": "FC Gravelines",
+      "score1": "",
+      "score2": ""
+    },
+    {
+      "id": "P-5-B-1",
+      "rotation": 5,
+      "heure": "12:00",
+      "poule": "B",
+      "terrain": 4,
+      "team1": "Calais/Marck",
+      "team2": "UFL Lambersart 2",
+      "score1": "",
+      "score2": ""
+    },
+    {
+      "id": "P-6-C-0",
+      "rotation": 6,
+      "heure": "12:45",
+      "poule": "C",
+      "terrain": 1,
+      "team1": "US Ascq",
+      "team2": "FC Wasquehal",
+      "score1": "",
+      "score2": ""
+    },
+    {
+      "id": "P-6-C-1",
+      "rotation": 6,
+      "heure": "12:45",
+      "poule": "C",
+      "terrain": 2,
+      "team1": "FC Loon Plage",
+      "team2": "AS Dunkerque Sud",
+      "score1": "",
+      "score2": ""
+    },
+    {
+      "id": "P-6-D-0",
+      "rotation": 6,
+      "heure": "12:45",
+      "poule": "D",
+      "terrain": 3,
+      "team1": "OGS 2",
+      "team2": "UFL Lambersart 1",
+      "score1": "",
+      "score2": ""
+    },
+    {
+      "id": "P-6-D-1",
+      "rotation": 6,
+      "heure": "12:45",
+      "poule": "D",
+      "terrain": 4,
+      "team1": "AFC Compiègne",
+      "team2": "USF Coudekerque",
+      "score1": "",
+      "score2": ""
+    }
+  ],
+  "matchsLdc": [
+    {
+      "id": "LDC-Q1",
+      "tour": "Quart 1",
+      "heure": "13:30",
+      "terrain": 1,
+      "t1Label": "1er Poule A",
+      "t2Label": "2ème Poule B",
+      "team1": "",
+      "team2": "",
+      "score1": "",
+      "score2": ""
+    },
+    {
+      "id": "LDC-Q2",
+      "tour": "Quart 2",
+      "heure": "13:30",
+      "terrain": 2,
+      "t1Label": "1er Poule B",
+      "t2Label": "2ème Poule A",
+      "team1": "",
+      "team2": "",
+      "score1": "",
+      "score2": ""
+    },
+    {
+      "id": "LDC-Q3",
+      "tour": "Quart 3",
+      "heure": "13:45",
+      "terrain": 1,
+      "t1Label": "1er Poule C",
+      "t2Label": "2ème Poule D",
+      "team1": "",
+      "team2": "",
+      "score1": "",
+      "score2": ""
+    },
+    {
+      "id": "LDC-Q4",
+      "tour": "Quart 4",
+      "heure": "13:45",
+      "terrain": 2,
+      "t1Label": "1er Poule D",
+      "t2Label": "2ème Poule C",
+      "team1": "",
+      "team2": "",
+      "score1": "",
+      "score2": ""
+    },
+    {
+      "id": "LDC-D1",
+      "tour": "Demi 1",
+      "heure": "14:15",
+      "terrain": 1,
+      "t1Label": "Vainqueur Quart 1",
+      "t2Label": "Vainqueur Quart 3",
+      "team1": "",
+      "team2": "",
+      "score1": "",
+      "score2": ""
+    },
+    {
+      "id": "LDC-D2",
+      "tour": "Demi 2",
+      "heure": "14:15",
+      "terrain": 2,
+      "t1Label": "Vainqueur Quart 2",
+      "t2Label": "Vainqueur Quart 4",
+      "team1": "",
+      "team2": "",
+      "score1": "",
+      "score2": ""
+    },
+    {
+      "id": "LDC-F",
+      "tour": "FINALE 🏆",
+      "heure": "15:00",
+      "terrain": 1,
+      "t1Label": "Finaliste 1",
+      "t2Label": "Finaliste 2",
+      "team1": "",
+      "team2": "",
+      "score1": "",
+      "score2": "",
+      "isFinale": true
+    }
+  ],
+  "matchsEuropa": [
+    {
+      "id": "EUR-Q1",
+      "tour": "Quart 1",
+      "heure": "13:30",
+      "terrain": 3,
+      "t1Label": "3ème Poule A",
+      "t2Label": "4ème Poule B",
+      "team1": "",
+      "team2": "",
+      "score1": "",
+      "score2": ""
+    },
+    {
+      "id": "EUR-Q2",
+      "tour": "Quart 2",
+      "heure": "13:30",
+      "terrain": 4,
+      "t1Label": "3ème Poule B",
+      "t2Label": "4ème Poule A",
+      "team1": "",
+      "team2": "",
+      "score1": "",
+      "score2": ""
+    },
+    {
+      "id": "EUR-Q3",
+      "tour": "Quart 3",
+      "heure": "13:45",
+      "terrain": 3,
+      "t1Label": "3ème Poule C",
+      "t2Label": "4ème Poule D",
+      "team1": "",
+      "team2": "",
+      "score1": "",
+      "score2": ""
+    },
+    {
+      "id": "EUR-Q4",
+      "tour": "Quart 4",
+      "heure": "13:45",
+      "terrain": 4,
+      "t1Label": "3ème Poule D",
+      "t2Label": "4ème Poule C",
+      "team1": "",
+      "team2": "",
+      "score1": "",
+      "score2": ""
+    },
+    {
+      "id": "EUR-D1",
+      "tour": "Demi 1",
+      "heure": "14:15",
+      "terrain": 3,
+      "t1Label": "Vainqueur Quart 1",
+      "t2Label": "Vainqueur Quart 3",
+      "team1": "",
+      "team2": "",
+      "score1": "",
+      "score2": ""
+    },
+    {
+      "id": "EUR-D2",
+      "tour": "Demi 2",
+      "heure": "14:15",
+      "terrain": 4,
+      "t1Label": "Vainqueur Quart 2",
+      "t2Label": "Vainqueur Quart 4",
+      "team1": "",
+      "team2": "",
+      "score1": "",
+      "score2": ""
+    },
+    {
+      "id": "EUR-F",
+      "tour": "FINALE 🇪🇺",
+      "heure": "15:00",
+      "terrain": 2,
+      "t1Label": "Finaliste 1",
+      "t2Label": "Finaliste 2",
+      "team1": "",
+      "team2": "",
+      "score1": "",
+      "score2": "",
+      "isFinale": true
+    }
+  ]
+}
