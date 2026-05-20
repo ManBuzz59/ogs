@@ -191,6 +191,8 @@
         
         .btn-save-config { background: linear-gradient(to bottom, #3498db, #2980b9); color: white; border: none; padding: 15px; font-size: 1rem; font-weight: 700; text-transform: uppercase; border-radius: 8px; cursor: pointer; width: 100%; margin: 20px 0 40px 0; border-bottom: 3px solid #2471a3; }
         .btn-save-config:hover { filter: brightness(1.05); }
+
+        .export-box { width: 100%; height: 120px; font-family: monospace; font-size: 0.75rem; padding: 10px; border-radius: 6px; border: 1px solid #cbd5e1; background: #f8fafc; margin-top: 8px; resize: none; }
     </style>
 </head>
 <body>
@@ -271,9 +273,20 @@
         <div id="config-teams-container"></div>
         
         <button class="btn-save-config" onclick="sauvegarderEtAppliquerConfiguration()">💾 Sauvegarder et Régénérer le Tournoi</button>
+
+        <div class="section-title" style="color: var(--danger-color);">🔗 Partage pour les Viewers (Sauvegarde Globale)</div>
+        <p style="font-size: 0.8rem; font-weight: 600; color: var(--text-muted); margin-bottom: 8px;">
+            Pour que les nouveaux arrivants voient vos modifications, copiez le texte ci-dessous et collez-le dans votre fichier HTML à la ligne 172 `DONNEES_INITIALES = ...` :
+        </p>
+        <textarea id="export-json-area" class="export-box" readonly onclick="this.select()"></textarea>
     </div>
 
     <script>
+        // ==========================================
+        // 💾 ZONE MAÎTRE : METTRE À JOUR POUR LES VIEWERS
+        // ==========================================
+        const DONNEES_INITIALES = null; // Laissez null au départ ou collez le texte ici.
+
         let isAdmin = false;
         const ADMIN_CODE = "5976";
         
@@ -287,7 +300,6 @@
             dureeRot: 10
         };
 
-        // Données d'équipes modifiables en local (appliquées uniquement lors de la sauvegarde)
         let d_equipes = {
             'A': ['OGS 1', 'USP St Omer', 'FC Bergues', 'KSV Veurne'],
             'B': ['USLD Dunkerque', 'Calais/Marck', 'UFL Lambersart 2', 'FC Gravelines'],
@@ -300,19 +312,117 @@
         let matchsEuropa = [];
         let d_classements_finaux = {};
 
+        function mettreAJourExportationTextuelle() {
+            let backup = {
+                configTournoi: configTournoi,
+                d_equipes: d_equipes,
+                matchsPoules: matchsPoules,
+                matchsLdc: matchsLdc,
+                matchsEuropa: matchsEuropa
+            };
+            document.getElementById('export-json-area').value = JSON.stringify(backup);
+        }
+
+        function sauvegarderDansLeNavigateur() {
+            localStorage.setItem('ogs_configTournoi', JSON.stringify(configTournoi));
+            localStorage.setItem('ogs_d_equipes', JSON.stringify(d_equipes));
+            localStorage.setItem('ogs_matchsPoules', JSON.stringify(matchsPoules));
+            localStorage.setItem('ogs_matchsLdc', JSON.stringify(matchsLdc));
+            localStorage.setItem('ogs_matchsEuropa', JSON.stringify(matchsEuropa));
+            mettreAJourExportationTextuelle();
+        }
+
+        function chargerDonneesGénérales() {
+            // Priorité 1 : Le code injecté de manière permanente dans le fichier HTML (Utile pour tous les nouveaux Viewers)
+            if (DONNEES_INITIALES) {
+                configTournoi = DONNEES_INITIALES.configTournoi;
+                d_equipes = DONNEES_INITIALES.d_equipes;
+                matchsPoules = DONNEES_INITIALES.matchsPoules;
+                matchsLdc = DONNEES_INITIALES.matchsLdc;
+                matchsEuropa = DONNEES_INITIALES.matchsEuropa;
+                return true;
+            }
+            // Priorité 2 : Mémoire locale du navigateur actuel
+            if (localStorage.getItem('ogs_configTournoi')) {
+                configTournoi = JSON.parse(localStorage.getItem('ogs_configTournoi'));
+                d_equipes = JSON.parse(localStorage.getItem('ogs_d_equipes'));
+                matchsPoules = JSON.parse(localStorage.getItem('ogs_matchsPoules'));
+                matchsLdc = JSON.parse(localStorage.getItem('ogs_matchsLdc'));
+                matchsEuropa = JSON.parse(localStorage.getItem('ogs_matchsEuropa'));
+                return true; 
+            }
+            return false;
+        }
+
+        function rafraichirChampsFormulaire() {
+            document.getElementById('cfg-date').value = configTournoi.date;
+            document.getElementById('cfg-heure-debut').value = configTournoi.heureDebut;
+            document.getElementById('cfg-heure-fin').value = configTournoi.heureFin;
+            document.getElementById('cfg-terrains').value = configTournoi.nbTerrains;
+            document.getElementById('cfg-duree-mitemps').value = configTournoi.dureeMitemps;
+            document.getElementById('cfg-duree-pause').value = configTournoi.dureePause;
+            document.getElementById('cfg-duree-rot').value = configTournoi.dureeRot;
+
+            let options = { day: 'numeric', month: 'long' };
+            let dateFormatee = new Date(configTournoi.date).toLocaleDateString('fr-FR', options);
+            document.getElementById('header-sub-title').innerText = `🏆 Tournoi Officiel du ${dateFormatee} • Live Poules & Finales`;
+        }
+
+        function ajouterMinutesAHeure(heureStr, minutesAAjouter) {
+            let [h, m] = heureStr.split(':').map(Number);
+            let totalMinutes = h * 60 + m + minutesAAjouter;
+            let nouvellesHeures = Math.floor(totalMinutes / 60) % 24;
+            let nouvellesMinutes = totalMinutes % 60;
+            nouvellesMinutes = Math.round(nouvellesMinutes / 15) * 15;
+            if(nouvellesMinutes === 60) {
+                nouvellesMinutes = 0;
+                nouvellesHeures = (nouvellesHeures + 1) % 24;
+            }
+            return `${nouvellesHeures.toString().padStart(2, '0')}:${nouvellesMinutes.toString().padStart(2, '0')}`;
+        }
+
+        function verifierDoublonsMatchs() {
+            let occupation = {};
+            let aUnDoublon = false;
+
+            for (let m of matchsPoules) {
+                let cle = `${m.heure}-T${m.terrain}`;
+                if (occupation[cle]) { aUnDoublon = true; break; }
+                occupation[cle] = true;
+            }
+            for (let m of matchsLdc) {
+                if(m.team1 || m.team2) {
+                    let cle = `${m.heure}-T${m.terrain}`;
+                    if (occupation[cle]) { aUnDoublon = true; break; }
+                    occupation[cle] = true;
+                }
+            }
+            for (let m of matchsEuropa) {
+                if(m.team1 || m.team2) {
+                    let cle = `${m.heure}-T${m.terrain}`;
+                    if (occupation[cle]) { aUnDoublon = true; break; }
+                    occupation[cle] = true;
+                }
+            }
+            return aUnDoublon;
+        }
+
         function initMatchsPoules() {
             matchsPoules = [];
             const oppositions = [[0,1], [2,3], [0,2], [1,3], [0,3], [1,2]];
-            const rotations = [
-                { num: 1, heure: "09:00", poules: ['A', 'B'] },
-                { num: 2, heure: "10:00", poules: ['C', 'D'] },
-                { num: 3, heure: "11:00", poules: ['A', 'B'] },
-                { num: 4, heure: "12:00", poules: ['C', 'D'] },
-                { num: 5, heure: "13:00", poules: ['A', 'B'] },
-                { num: 6, heure: "14:00", poules: ['C', 'D'] }
+            let dureeTotaleMatch = (configTournoi.dureeMitemps * 2) + configTournoi.dureePause + configTournoi.dureeRot;
+            let heureActuelleRotation = configTournoi.heureDebut;
+            
+            const rotationsDef = [
+                { num: 1, poules: ['A', 'B'] },
+                { num: 2, poules: ['C', 'D'] },
+                { num: 3, poules: ['A', 'B'] },
+                { num: 4, poules: ['C', 'D'] },
+                { num: 5, poules: ['A', 'B'] },
+                { num: 6, poules: ['C', 'D'] }
             ];
 
-            rotations.forEach((rot) => {
+            rotationsDef.forEach((rot) => {
                 let currentTerrain = 1;
                 rot.poules.forEach(poule => {
                     let oppIndex = (rot.num === 1 || rot.num === 2) ? 0 : ((rot.num === 3 || rot.num === 4) ? 2 : 4);
@@ -325,7 +435,7 @@
                         matchsPoules.push({
                             id: `P-${rot.num}-${poule}-${i}`,
                             rotation: rot.num,
-                            heure: rot.heure,
+                            heure: heureActuelleRotation,
                             poule: poule,
                             terrain: currentTerrain <= configTournoi.nbTerrains ? currentTerrain : 1,
                             team1: eq1,
@@ -336,28 +446,37 @@
                         currentTerrain++;
                     }
                 });
+                heureActuelleRotation = ajouterMinutesAHeure(heureActuelleRotation, dureeTotaleMatch);
             });
         }
 
         function initPhasesFinalesVides() {
+            let dureeTotaleMatch = (configTournoi.dureeMitemps * 2) + configTournoi.dureePause + configTournoi.dureeRot;
+            let heureFinPoules = configTournoi.heureDebut;
+            for(let r=0; r<6; r++) { heureFinPoules = ajouterMinutesAHeure(heureFinPoules, dureeTotaleMatch); }
+
+            let heureQuarts = heureFinPoules;
+            let heureDemis = ajouterMinutesAHeure(heureQuarts, dureeTotaleMatch);
+            let heureFinales = ajouterMinutesAHeure(heureDemis, dureeTotaleMatch);
+
             matchsLdc = [
-                { id: 'LDC-Q1', tour: 'Quart 1', heure: '15:30', terrain: 1, t1Label: '1er Poule A', t2Label: '2ème Poule B', team1: '', team2: '', score1: '', score2: '' },
-                { id: 'LDC-Q2', tour: 'Quart 2', heure: '15:30', terrain: 2, t1Label: '1er Poule B', t2Label: '2ème Poule A', team1: '', team2: '', score1: '', score2: '' },
-                { id: 'LDC-Q3', tour: 'Quart 3', heure: '16:30', terrain: 1, t1Label: '1er Poule C', t2Label: '2ème Poule D', team1: '', team2: '', score1: '', score2: '' },
-                { id: 'LDC-Q4', tour: 'Quart 4', heure: '16:30', terrain: 2, t1Label: '1er Poule D', t2Label: '2ème Poule C', team1: '', team2: '', score1: '', score2: '' },
-                { id: 'LDC-D1', tour: 'Demi 1', heure: '17:30', terrain: 1, t1Label: 'Vainqueur Quart 1', t2Label: 'Vainqueur Quart 3', team1: '', team2: '', score1: '', score2: '' },
-                { id: 'LDC-D2', tour: 'Demi 2', heure: '17:30', terrain: 2, t1Label: 'Vainqueur Quart 2', t2Label: 'Vainqueur Quart 4', team1: '', team2: '', score1: '', score2: '' },
-                { id: 'LDC-F', tour: 'FINALE 🏆', heure: '18:45', terrain: 1, t1Label: 'Finaliste 1', t2Label: 'Finaliste 2', team1: '', team2: '', score1: '', score2: '', isFinale: true }
+                { id: 'LDC-Q1', tour: 'Quart 1', heure: heureQuarts, terrain: 1, t1Label: '1er Poule A', t2Label: '2ème Poule B', team1: '', team2: '', score1: '', score2: '' },
+                { id: 'LDC-Q2', tour: 'Quart 2', heure: heureQuarts, terrain: 2, t1Label: '1er Poule B', t2Label: '2ème Poule A', team1: '', team2: '', score1: '', score2: '' },
+                { id: 'LDC-Q3', tour: 'Quart 3', heure: ajouterMinutesAHeure(heureQuarts, 15), terrain: 1, t1Label: '1er Poule C', t2Label: '2ème Poule D', team1: '', team2: '', score1: '', score2: '' },
+                { id: 'LDC-Q4', tour: 'Quart 4', heure: ajouterMinutesAHeure(heureQuarts, 15), terrain: 2, t1Label: '1er Poule D', t2Label: '2ème Poule C', team1: '', team2: '', score1: '', score2: '' },
+                { id: 'LDC-D1', tour: 'Demi 1', heure: heureDemis, terrain: 1, t1Label: 'Vainqueur Quart 1', t2Label: 'Vainqueur Quart 3', team1: '', team2: '', score1: '', score2: '' },
+                { id: 'LDC-D2', tour: 'Demi 2', heure: heureDemis, terrain: 2, t1Label: 'Vainqueur Quart 2', t2Label: 'Vainqueur Quart 4', team1: '', team2: '', score1: '', score2: '' },
+                { id: 'LDC-F', tour: 'FINALE 🏆', heure: heureFinales, terrain: 1, t1Label: 'Finaliste 1', t2Label: 'Finaliste 2', team1: '', team2: '', score1: '', score2: '', isFinale: true }
             ];
 
             matchsEuropa = [
-                { id: 'EUR-Q1', tour: 'Quart 1', heure: '15:30', terrain: 3, t1Label: '3ème Poule A', t2Label: '4ème Poule B', team1: '', team2: '', score1: '', score2: '' },
-                { id: 'EUR-Q2', tour: 'Quart 2', heure: '15:30', terrain: 4, t1Label: '3ème Poule B', t2Label: '4ème Poule A', team1: '', team2: '', score1: '', score2: '' },
-                { id: 'EUR-Q3', tour: 'Quart 3', heure: '16:30', terrain: 3, t1Label: '3ème Poule C', t2Label: '4ème Poule D', team1: '', team2: '', score1: '', score2: '' },
-                { id: 'EUR-Q4', tour: 'Quart 4', heure: '16:30', terrain: 4, t1Label: '3ème Poule D', t2Label: '4ème Poule C', team1: '', team2: '', score1: '', score2: '' },
-                { id: 'EUR-D1', tour: 'Demi 1', heure: '17:30', terrain: 3, t1Label: 'Vainqueur Quart 1', t2Label: 'Vainqueur Quart 3', team1: '', team2: '', score1: '', score2: '' },
-                { id: 'EUR-D2', tour: 'Demi 2', heure: '17:30', terrain: 4, t1Label: 'Vainqueur Quart 2', t2Label: 'Vainqueur Quart 4', team1: '', team2: '', score1: '', score2: '' },
-                { id: 'EUR-F', tour: 'FINALE 🇪🇺', heure: '18:45', terrain: 2, t1Label: 'Finaliste 1', t2Label: 'Finaliste 2', team1: '', team2: '', score1: '', score2: '', isFinale: true }
+                { id: 'EUR-Q1', tour: 'Quart 1', heure: heureQuarts, terrain: 3, t1Label: '3ème Poule A', t2Label: '4ème Poule B', team1: '', team2: '', score1: '', score2: '' },
+                { id: 'EUR-Q2', tour: 'Quart 2', heure: heureQuarts, terrain: 4, t1Label: '3ème Poule B', t2Label: '4ème Poule A', team1: '', team2: '', score1: '', score2: '' },
+                { id: 'EUR-Q3', tour: 'Quart 3', heure: ajouterMinutesAHeure(heureQuarts, 15), terrain: 3, t1Label: '3ème Poule C', t2Label: '4ème Poule D', team1: '', team2: '', score1: '', score2: '' },
+                { id: 'EUR-Q4', tour: 'Quart 4', heure: ajouterMinutesAHeure(heureQuarts, 15), terrain: 4, t1Label: '3ème Poule D', t2Label: '4ème Poule C', team1: '', team2: '', score1: '', score2: '' },
+                { id: 'EUR-D1', tour: 'Demi 1', heure: heureDemis, terrain: 3, t1Label: 'Vainqueur Quart 1', t2Label: 'Vainqueur Quart 3', team1: '', team2: '', score1: '', score2: '' },
+                { id: 'EUR-D2', tour: 'Demi 2', heure: heureDemis, terrain: 4, t1Label: 'Vainqueur Quart 2', t2Label: 'Vainqueur Quart 4', team1: '', team2: '', score1: '', score2: '' },
+                { id: 'EUR-F', tour: 'FINALE 🇪🇺', heure: heureFinales, terrain: 2, t1Label: 'Finaliste 1', t2Label: 'Finaliste 2', team1: '', team2: '', score1: '', score2: '', isFinale: true }
             ];
         }
 
@@ -370,6 +489,7 @@
                     document.getElementById('adminBtn').classList.add('is-admin');
                     document.getElementById('validationContainer').style.display = 'block';
                     document.getElementById('tab-btn-config').style.display = 'block';
+                    mettreAJourExportationTextuelle();
                     renderAll();
                 } else { alert("Code incorrect !"); }
             } else {
@@ -394,7 +514,6 @@
             event.currentTarget.classList.add("active");
         }
 
-        // Exécuté uniquement via le bouton de validation en bas de page
         function sauvegarderEtAppliquerConfiguration() {
             configTournoi.date = document.getElementById('cfg-date').value;
             configTournoi.heureDebut = document.getElementById('cfg-heure-debut').value;
@@ -408,13 +527,18 @@
             let dateFormatee = new Date(configTournoi.date).toLocaleDateString('fr-FR', options);
             document.getElementById('header-sub-title').innerText = `🏆 Tournoi Officiel du ${dateFormatee} • Live Poules & Finales`;
 
-            // Ré-initialiser la grille des matchs pour prendre en compte les nouvelles équipes / terrains
             initMatchsPoules();
             initPhasesFinalesVides();
-            calculerTournoi();
-            renderAll();
 
-            alert("Configuration sauvegardée ! Le calendrier et les terrains ont été régénérés.");
+            if (verifierDoublonsMatchs()) {
+                alert("⚠️ Erreur Critique : Deux matchs se chevauchent sur le même terrain à la même heure.");
+                return;
+            }
+
+            calculerTournoi();
+            sauvegarderDansLeNavigateur(); 
+            renderAll();
+            alert("💾 Enregistré localement ! Utilisez la zone de partage en bas de page pour mettre à jour le fichier pour tout le monde.");
         }
 
         function updateMatchField(matchId, field, value, typeList) {
@@ -422,11 +546,12 @@
             let m = list.find(match => match.id === matchId);
             if(m) {
                 m[field] = value;
+                if(verifierDoublonsMatchs()) { alert("⚠️ Doublon détecté !"); }
                 calculerTournoi();
+                sauvegarderDansLeNavigateur();
             }
         }
 
-        // Séparation Heure / Minute au pas de 15 min
         function updateMatchTimeSelector(matchId, part, value, typeList) {
             let list = typeList === 'poules' ? matchsPoules : (typeList === 'ldc' ? matchsLdc : matchsEuropa);
             let m = list.find(match => match.id === matchId);
@@ -434,30 +559,47 @@
                 let currentParts = m.heure.split(':');
                 let h = currentParts[0] || "09";
                 let min = currentParts[1] || "00";
-                
                 if(part === 'h') h = value;
                 if(part === 'm') min = value;
                 
+                let ancienneHeure = m.heure;
                 m.heure = `${h}:${min}`;
+
+                if(verifierDoublonsMatchs()) {
+                    alert("⚠️ Conflit d'horaire !");
+                    m.heure = ancienneHeure;
+                } else {
+                    sauvegarderDansLeNavigateur();
+                }
+                renderAll();
             }
         }
 
         function modifierNomEquipe(poule, index, nouveauNom) {
+            let ancienNom = d_equipes[poule][index];
             d_equipes[poule][index] = nouveauNom;
+            matchsPoules.forEach(m => {
+                if(m.poule === poule) {
+                    if(m.team1 === ancienNom) m.team1 = nouveauNom;
+                    if(m.team2 === ancienNom) m.team2 = nouveauNom;
+                }
+            });
+            sauvegarderDansLeNavigateur();
         }
 
         function ajouterEquipe(poule) {
             let num = d_equipes[poule].length + 1;
             d_equipes[poule].push(`Nouvelle Équipe ${num}`);
+            sauvegarderDansLeNavigateur();
             renderConfigEquipes();
         }
 
         function supprimerEquipe(poule, index) {
             d_equipes[poule].splice(index, 1);
+            sauvegarderDansLeNavigateur();
             renderConfigEquipes();
         }
 
-        // Génère le select d'Heures (00 à 23) et Minutes (00, 15, 30, 45)
         function renderTimeSelects(matchId, currentValue, typeList) {
             let parts = currentValue.split(':');
             let currentH = parts[0] || "09";
@@ -475,7 +617,6 @@
                 htmlM += `<option value="${min}" ${currentM === min ? 'selected' : ''}>${min}</option>`;
             });
             htmlM += `</select>`;
-
             return htmlH + ":" + htmlM;
         }
 
@@ -567,10 +708,8 @@
                 if (m.score1 !== "" && m.score2 !== "" && stats[m.team1] && stats[m.team2]) {
                     let s1 = parseInt(m.score1) || 0;
                     let s2 = parseInt(m.score2) || 0;
-
                     stats[m.team1].bm += s1; stats[m.team1].be += s2;
                     stats[m.team2].bm += s2; stats[m.team2].be += s1;
-
                     if (s1 > s2) { stats[m.team1].pts += 3; }
                     else if (s1 < s2) { stats[m.team2].pts += 3; }
                     else { stats[m.team1].pts += 1; stats[m.team2].pts += 1; }
@@ -583,7 +722,6 @@
             for (let poule in d_equipes) {
                 let equipesTriees = d_equipes[poule].map(t => ({name: t, ...stats[t]})).filter(e => e.name !== "Vide");
                 equipesTriees.sort((a, b) => b.pts - a.pts || b.diff - a.diff || b.bm - a.bm);
-
                 d_classements_finaux[poule] = equipesTriees;
 
                 html += `
@@ -600,7 +738,6 @@
                             </tr>
                         </thead>
                         <tbody>`;
-
                 equipesTriees.forEach((eq, index) => {
                     let diffAffichage = eq.diff > 0 ? `+${eq.diff}` : eq.diff;
                     html += `
@@ -620,7 +757,6 @@
         function validerPoulesEtGenererPhasesFinales() {
             if (confirm("Confirmer la validation des poules et générer les tableaux finaux ?")) {
                 calculerTournoi();
-
                 matchsLdc[0].team1 = d_classements_finaux['A'][0]?.name || '1er A';
                 matchsLdc[0].team2 = d_classements_finaux['B'][1]?.name || '2ème B';
                 matchsLdc[1].team1 = d_classements_finaux['B'][0]?.name || '1er B';
@@ -639,6 +775,7 @@
                 matchsEuropa[3].team1 = d_classements_finaux['D'][2]?.name || '3ème D';
                 matchsEuropa[3].team2 = d_classements_finaux['C'][3]?.name || '4ème C';
 
+                sauvegarderDansLeNavigateur();
                 renderAll();
                 alert("Tableaux mis à jour !");
                 openTab('ldc');
@@ -653,9 +790,14 @@
         }
 
         window.onload = function() {
-            initMatchsPoules();
-            initPhasesFinalesVides();
+            let historiqueExiste = chargerDonneesGénérales();
+            if (!historiqueExiste) {
+                initMatchsPoules();
+                initPhasesFinalesVides();
+            }
+            rafraichirChampsFormulaire();
             calculerTournoi();
+            mettreAJourExportationTextuelle();
             renderAll();
         };
     </script>
